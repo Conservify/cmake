@@ -1,3 +1,7 @@
+if(TARGET Wire)
+  return()
+endif()
+
 file(GLOB files ${ARDUINO_BOARD_CORE_LIBRARIES_PATH}/Wire/*.cpp)
 
 add_arduino_library(Wire ${files})

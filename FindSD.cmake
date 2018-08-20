@@ -1,3 +1,7 @@
+if(TARGET SD)
+  return()
+endif()
+
 file(GLOB files ${ARDUINO_LIBRARIES_PATH}/SD/*.cpp)
 
 add_arduino_library(SD ${files})

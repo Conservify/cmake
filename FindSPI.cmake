@@ -1,3 +1,7 @@
+if(TARGET SPI)
+  return()
+endif()
+
 file(GLOB files ${ARDUINO_BOARD_CORE_LIBRARIES_PATH}/SPI/*.cpp)
 
 add_arduino_library(SPI ${files})

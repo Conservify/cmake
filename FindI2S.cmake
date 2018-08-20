@@ -1,3 +1,7 @@
+if(TARGET I2S)
+  return()
+endif()
+
 file(GLOB files ${ARDUINO_BOARD_CORE_LIBRARIES_PATH}/I2S/*.cpp)
 
 add_arduino_library(I2S ${files})

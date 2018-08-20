@@ -111,7 +111,7 @@ function(enable_arduino_toolchain)
 endfunction()
 
 function(configure_firmware_link target_name)
-  get_target_property(libraries blink LINK_LIBRARIES)
+  get_target_property(libraries ${target_name} LINK_LIBRARIES)
 
   set(library_files ${CMAKE_CURRENT_BINARY_DIR}/lib${target_name}.a)
   foreach(library ${libraries})
@@ -189,7 +189,7 @@ function(add_external_arduino_library name)
   message(STATUS "Library: ${name} (${sources_path})")
 
   if (NOT TARGET ${name})
-    if (${recurse})
+    if (recurse)
       file(GLOB_RECURSE sources ${sources_path}/*.c ${sources_path}/*.cpp)
     else()
       file(GLOB sources ${sources_path}/*.c ${sources_path}/*.cpp)

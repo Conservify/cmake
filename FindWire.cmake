@@ -1,4 +1,4 @@
-if(TARGET Wire)
+if (TARGET Wire)
   return()
 endif()
 

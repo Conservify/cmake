@@ -1,4 +1,4 @@
-if(TARGET SPI)
+if (TARGET SPI)
   return()
 endif()
 

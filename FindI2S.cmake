@@ -1,4 +1,4 @@
-if(TARGET I2S)
+if (TARGET I2S)
   return()
 endif()
 

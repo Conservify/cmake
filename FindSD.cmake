@@ -1,4 +1,4 @@
-if(TARGET SD)
+if (TARGET SD)
   return()
 endif()
 

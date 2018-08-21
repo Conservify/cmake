@@ -124,7 +124,8 @@ function(configure_firmware_link target_name additional_libraries)
   set(library_files ${CMAKE_CURRENT_BINARY_DIR}/lib${target_name}.a)
   if(NOT "${libraries}" STREQUAL "libraries-NOTFOUND")
     foreach(library ${libraries})
-      list(APPEND library_files ${CMAKE_CURRENT_BINARY_DIR}/lib${library}.a)
+      get_target_property(library_dir ${library} BINARY_DIR)
+      list(APPEND library_files ${library_dir}/lib${library}.a)
     endforeach()
   endif()
 
@@ -181,7 +182,7 @@ function(add_arduino_firmware target_name)
 
   target_link_libraries(${target_name} arduino-core)
 
-  configure_firmware_link(${target_name} "-larm_cortexM0l_math -lm ${PRINTF_FLAGS}")
+  configure_firmware_link(${target_name} -larm_cortexM0l_math -lm ${PRINTF_FLAGS})
 endfunction()
 
 function(add_arduino_bootloader target_name)

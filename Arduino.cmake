@@ -62,6 +62,10 @@ function(configure_compile_options target_name sources)
 endfunction()
 
 function(configure_arduino_core_target)
+  if(TARGET arduino-core)
+    return()
+  endif()
+
   set(sources
     ${ARDUINO_BOARD_DIRECTORY}/variant.cpp
     ${ARDUINO_CORE_DIRECTORY}/pulse_asm.S
@@ -110,25 +114,36 @@ function(enable_arduino_toolchain)
   set(CMAKE_RANLIB "${ARM_TOOLS}/arm-none-eabi-ranlib" PARENT_SCOPE)
 endfunction()
 
-function(configure_firmware_link target_name)
+function(configure_firmware_linker_script target_name script)
+  set(${target_name}_LINKER ${script} PARENT_SCOPE)
+endfunction()
+
+function(configure_firmware_link target_name additional_libraries)
   get_target_property(libraries ${target_name} LINK_LIBRARIES)
 
   set(library_files ${CMAKE_CURRENT_BINARY_DIR}/lib${target_name}.a)
-  foreach(library ${libraries})
-    list(APPEND library_files ${CMAKE_CURRENT_BINARY_DIR}/lib${library}.a)
-  endforeach()
+  if(NOT "${libraries}" STREQUAL "libraries-NOTFOUND")
+    foreach(library ${libraries})
+      list(APPEND library_files ${CMAKE_CURRENT_BINARY_DIR}/lib${library}.a)
+    endforeach()
+  endif()
 
   add_custom_target(${target_name}.elf)
 
   add_dependencies(${target_name}.elf ${target_name})
 
+  set(linker_script ${ARDUINO_BOOTLOADER})
+  if(DEFINED ${target_name}_LINKER)
+    set(linker_script ${${target_name}_LINKER})
+  endif()
+
   add_custom_command(TARGET ${target_name}.elf POST_BUILD
-    COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${ARDUINO_BOOTLOADER} ${PRINTF_FLAGS}
+    COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
     --specs=nano.specs --specs=nosys.specs -mcpu=${ARDUINO_MCU} -mthumb -Wl,--cref -Wl,--check-sections
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
     ${library_files}
-    -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ -larm_cortexM0l_math -lm
+    -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ ${additional_libraries}
   )
 
   add_custom_target(${target_name}.bin)
@@ -166,11 +181,17 @@ function(add_arduino_firmware target_name)
 
   target_link_libraries(${target_name} arduino-core)
 
-  configure_firmware_link(${target_name})
+  configure_firmware_link(${target_name} "-larm_cortexM0l_math -lm ${PRINTF_FLAGS}")
+endfunction()
+
+function(add_arduino_bootloader target_name)
+  configure_arduino_core_target()
+
+  configure_firmware_link(${target_name} "")
 endfunction()
 
 function(add_external_arduino_library name)
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+  if(NOT DEFINED EXTERNAL_DEPENDENCIES)
     include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
   endif()
 
@@ -197,12 +218,15 @@ function(add_external_arduino_library name)
 
     add_arduino_library(${name} "${sources}")
 
-    target_include_directories(${name} PUBLIC ${sources_path})
+    target_include_directories(${name}
+      PUBLIC ${sources_path}
+      PRIVATE ${sources_path}
+    )
   endif()
 endfunction()
 
 function(add_gitdeps)
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+  if(NOT DEFINED EXTERNAL_DEPENDENCIES)
     message(STATUS "Including: ${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake")
     include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
   endif()

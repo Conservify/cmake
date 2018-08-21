@@ -143,8 +143,8 @@ function(configure_firmware_link target_name additional_libraries)
     --specs=nano.specs --specs=nosys.specs -mcpu=${ARDUINO_MCU} -mthumb -Wl,--cref -Wl,--check-sections
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
-    ${library_files}
-    -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ ${additional_libraries}
+    -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/
+    ${library_files} ${additional_libraries}
   )
 
   add_custom_target(${target_name}.bin)
@@ -182,7 +182,8 @@ function(add_arduino_firmware target_name)
 
   target_link_libraries(${target_name} arduino-core)
 
-  configure_firmware_link(${target_name} -larm_cortexM0l_math -lm ${PRINTF_FLAGS})
+  set(ld_flags -lm -larm_cortexM0l_math ${PRINTF_FLAGS})
+  configure_firmware_link(${target_name} "${ld_flags}")
 endfunction()
 
 function(add_arduino_bootloader target_name)

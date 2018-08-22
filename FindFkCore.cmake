@@ -164,8 +164,21 @@ function(fk_core_apply_configuration target_name)
   endif(FK_CORE_REQUIRE_MODULES)
 endfunction()
 
+function(fk_write_profile target_names)
+  foreach(target_name ${target_names})
+    list(APPEND target_names firmware-common-${target_name})
+  endforeach()
+
+  foreach(target_name ${target_names})
+    get_target_property(options ${target_name} COMPILE_OPTIONS)
+    if(NOT "${options}" STREQUAL "options-NOTFOUND")
+      message(STATUS "Options: ${target_name}: ${options}")
+    endif()
+  endforeach()
+endfunction()
+
 function(fk_configure_core target_name)
-  message("Configuring FkCore: ${target_name}")
+  message(STATUS "Configuring FkCore: ${target_name}")
 
   fk_add_core_library(firmware-common-${target_name})
 

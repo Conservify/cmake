@@ -85,7 +85,7 @@ function(fk_add_core_library target_name)
     target_compile_definitions(${target_name} PUBLIC -DFK_DISABLE_RADIO)
   endif(FK_ENABLE_RADIO)
 
-  target_compile_definitions(${target_name} PUBLIC -DFK_NATURALIST -DFK_CORE)
+  target_compile_definitions(${target_name} PUBLIC -DFK_CORE)
 endfunction()
 
 function(fk_core_apply_configuration target_name)

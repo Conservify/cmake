@@ -4,8 +4,6 @@ endif()
 
 file(GLOB files ${ARDUINO_LIBRARIES_PATH}/SD/src/*.cpp)
 
-message("${ARDUINO_LIBRARIES_PATH}")
-
 add_arduino_library(SD "${files}")
 
 target_include_directories(SD

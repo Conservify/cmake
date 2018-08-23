@@ -1,4 +1,4 @@
-if (TARGET lwcron)
+if(TARGET lwcron)
   return()
 endif()
 

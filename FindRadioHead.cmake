@@ -1,4 +1,4 @@
-if (TARGET RadioHead)
+if(TARGET RadioHead)
   return()
 endif()
 

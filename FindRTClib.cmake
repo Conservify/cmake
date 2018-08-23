@@ -1,4 +1,4 @@
-if (TARGET RTClib)
+if(TARGET RTClib)
   return()
 endif()
 

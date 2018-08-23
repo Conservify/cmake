@@ -1,4 +1,4 @@
-if (TARGET Adafruit_ASFcore)
+if(TARGET Adafruit_ASFcore)
   return()
 endif()
 

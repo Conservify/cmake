@@ -1,4 +1,4 @@
-if (TARGET RTCZero)
+if(TARGET RTCZero)
   return()
 endif()
 

@@ -1,4 +1,4 @@
-if (TARGET phylum)
+if(TARGET phylum)
   return()
 endif()
 

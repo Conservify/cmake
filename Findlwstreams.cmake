@@ -1,4 +1,4 @@
-if (TARGET lwstreams)
+if(TARGET lwstreams)
   return()
 endif()
 

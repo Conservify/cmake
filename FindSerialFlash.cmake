@@ -1,4 +1,4 @@
-if (TARGET SerialFlash)
+if(TARGET SerialFlash)
   return()
 endif()
 

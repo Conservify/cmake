@@ -1,9 +1,9 @@
-if (TARGET atlas-protocol)
+if(TARGET atlas-protocol)
   return()
 endif()
 
-find_package(nanopb)
-
 add_external_arduino_library(atlas-protocol)
+
+find_package(nanopb)
 
 target_link_libraries(atlas-protocol nanopb)

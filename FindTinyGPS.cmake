@@ -1,4 +1,4 @@
-if (TARGET TinyGPS)
+if(TARGET TinyGPS)
   return()
 endif()
 

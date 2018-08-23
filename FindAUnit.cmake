@@ -1,4 +1,4 @@
-if (TARGET AUnit)
+if(TARGET AUnit)
   return()
 endif()
 

@@ -1,4 +1,4 @@
-if (TARGET Adafruit_Sensor)
+if(TARGET Adafruit_Sensor)
   return()
 endif()
 

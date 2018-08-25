@@ -28,7 +28,6 @@ set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD
 set(ARDUINO_BOOTLOADER "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}/linker_scripts/gcc/flash_with_bootloader.ld")
 set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY})
 
-set(PRINTF_FLAGS -lc -u _printf_float)
 set(ARDUINO_USB_STRING_FLAGS "-DUSB_MANUFACTURER=\"Arduino LLC\" -DUSB_PRODUCT=\"\\\"Arduino Zero\\\"\"")
 set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=2491 -DARDUINO_M0PLUS=10605 -DARDUINO_SAMD_ZERO -DARDUINO_ARCH_SAMD -D__SAMD21G18A__ -DUSB_VID=0x2341 -DUSB_PID=0x804d -DUSBCON")
 set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}")
@@ -190,7 +189,8 @@ function(add_arduino_firmware target_name)
 
   target_link_libraries(${target_name} arduino-core)
 
-  set(ld_flags -lm -larm_cortexM0l_math ${PRINTF_FLAGS})
+  # set(ld_flags -lm -larm_cortexM0l_math -lc -u _printf_float)
+  set(ld_flags -lm -larm_cortexM0l_math)
   configure_firmware_link(${target_name} "${ld_flags}")
 endfunction()
 

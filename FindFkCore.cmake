@@ -33,6 +33,7 @@ function(fk_add_core_library target_name)
 
   find_package(phylum)
   target_link_libraries(${target_name} phylum)
+  target_compile_options(phylum PUBLIC -DPHYLUM_ENABLE_SERIAL_FLASH -DPHYLUM_ENABLE_SD)
 
   find_package(module-protocol)
   target_link_libraries(${target_name} module-protocol)
@@ -48,6 +49,7 @@ function(fk_add_core_library target_name)
 
   find_package(lwstreams)
   target_link_libraries(${target_name} lwstreams)
+  target_compile_options(phylum PUBLIC -DLWS_ENABLE_PROTOBUF)
 
   find_package(lwcron)
   target_link_libraries(${target_name} lwcron)
@@ -84,8 +86,6 @@ function(fk_add_core_library target_name)
 
   find_package(SerialFlash)
   target_link_libraries(${target_name} SerialFlash)
-
-  target_compile_options(phylum PUBLIC -DPHYLUM_ENABLE_SERIAL_FLASH -DPHYLUM_ENABLE_SD)
 
   target_include_directories(${target_name}
     PUBLIC ${${target_name}_PATH}/src
@@ -128,6 +128,9 @@ function(fk_core_apply_configuration target_name)
   if(FK_CORE_GENERATION_2)
     target_compile_options(${library_target} PUBLIC -DFK_CORE)
     target_compile_options(${library_target} PUBLIC -DFK_CORE_GENERATION_2)
+    target_compile_options(${library_target} PUBLIC -DFK_RTC_PCF8523)
+    target_compile_options(${library_target} PUBLIC -DFK_HARDWARE_SERIAL2_ENABLE)
+    # target_compile_options(${library_target} PUBLIC -DFK_HARDWARE_WIRE11AND13_ENABLE)
   else()
     target_compile_options(${library_target} PUBLIC -DFK_CORE)
     target_compile_options(${library_target} PUBLIC -DFK_CORE_GENERATION_1)

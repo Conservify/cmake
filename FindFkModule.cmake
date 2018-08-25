@@ -18,7 +18,24 @@ add_definitions("-DFIRMWARE_GIT_BRANCH=\"${GIT_BRANCH}\"")
 add_definitions("-DFIRMWARE_BUILD=\"$ENV{BUILD_TAG}\"")
 
 if (NOT TARGET firmware-common)
-  add_external_arduino_library(firmware-common)
+  if(NOT DEFINED EXTERNAL_DEPENDENCIES)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+  endif()
+
+  set(_module_sources_path ${firmware-common_PATH})
+
+  file(GLOB _module_sources ${_module_sources_path}/src/common/*.cpp ${_module_sources_path}/src/modules/*.cpp)
+
+  add_arduino_library(firmware-common "${_module_sources}")
+
+  target_include_directories(firmware-common
+    PUBLIC
+      ${_module_sources_path}/src/common
+      ${_module_sources_path}/src/modules
+    PRIVATE
+      ${_module_sources_path}/src/common
+      ${_module_sources_path}/src/modules
+  )
 
   find_package(nanopb)
   target_link_libraries(firmware-common nanopb)

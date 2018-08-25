@@ -3,11 +3,24 @@ function(fk_add_core_library target_name)
 
   if(DEFINED firmware-common_PATH)
     set(${target_name}_PATH ${firmware-common_PATH})
+    set(sources_path ${firmware-common_PATH})
   else()
     set(${target_name}_PATH ../src)
+    set(sources_path ../)
   endif()
 
-  add_external_arduino_library(${target_name})
+  file(GLOB sources ${sources_path}/src/common/*.cpp ${sources_path}/src/core/*.cpp)
+  add_arduino_library(${target_name} "${sources}")
+
+  target_include_directories(${target_name}
+    PUBLIC
+      ${sources_path}/src/common
+      ${sources_path}/src/core
+    PRIVATE
+      ${sources_path}/src/common
+      ${sources_path}/src/core
+  )
+
 
   find_package(arduino-logging)
   target_link_libraries(${target_name} arduino-logging)

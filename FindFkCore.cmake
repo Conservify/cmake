@@ -12,6 +12,8 @@ function(fk_add_core_library target_name)
   file(GLOB sources ${sources_path}/src/common/*.cpp ${sources_path}/src/core/*.cpp)
   add_arduino_library(${target_name} "${sources}")
 
+  target_compile_options(${target_name} PRIVATE -Wall -Werror)
+
   target_include_directories(${target_name}
     PUBLIC
       ${sources_path}/src/common

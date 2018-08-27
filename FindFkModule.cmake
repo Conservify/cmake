@@ -28,6 +28,8 @@ if (NOT TARGET firmware-common)
 
   add_arduino_library(firmware-common "${_module_sources}")
 
+  target_compile_options(firmware-common PRIVATE -Wall -Werror)
+
   target_include_directories(firmware-common
     PUBLIC
       ${_module_sources_path}/src/common

@@ -70,6 +70,9 @@ if (NOT TARGET firmware-common)
   find_package(SerialFlash)
   target_link_libraries(firmware-common SerialFlash)
 
+  find_package(Adafruit_NeoPixel)
+  target_link_libraries(firmware-common Adafruit_NeoPixel)
+
   find_package(Wire)
   target_link_libraries(firmware-common Wire)
 

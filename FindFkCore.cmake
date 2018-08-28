@@ -89,6 +89,9 @@ function(fk_add_core_library target_name)
   find_package(SerialFlash)
   target_link_libraries(${target_name} SerialFlash)
 
+  find_package(Adafruit_NeoPixel)
+  target_link_libraries(${target_name} Adafruit_NeoPixel)
+
   target_include_directories(${target_name}
     PUBLIC ${${target_name}_PATH}/src
   )

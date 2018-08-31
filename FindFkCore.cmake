@@ -23,7 +23,6 @@ function(fk_add_core_library target_name)
       ${sources_path}/src/core
   )
 
-
   find_package(arduino-logging)
   target_link_libraries(${target_name} arduino-logging)
 
@@ -135,7 +134,6 @@ function(fk_core_apply_configuration target_name)
     target_compile_options(${library_target} PUBLIC -DFK_CORE_GENERATION_2)
     target_compile_options(${library_target} PUBLIC -DFK_RTC_PCF8523)
     target_compile_options(${library_target} PUBLIC -DFK_HARDWARE_SERIAL2_ENABLE)
-    # target_compile_options(${library_target} PUBLIC -DFK_HARDWARE_WIRE11AND13_ENABLE)
   else()
     target_compile_options(${library_target} PUBLIC -DFK_CORE)
     target_compile_options(${library_target} PUBLIC -DFK_CORE_GENERATION_1)

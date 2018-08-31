@@ -164,9 +164,9 @@ function(fk_core_apply_configuration target_name)
 
   option(FK_ENABLE_RADIO "Enable/disable LoRa radio." OFF)
   if(FK_ENABLE_RADIO)
-    target_compile_options(${library_target} PUBLIC -DFK_DISABLE_RADIO)
-  else()
     target_compile_options(${library_target} PUBLIC -DFK_ENABLE_RADIO)
+  else()
+    target_compile_options(${library_target} PUBLIC -DFK_DISABLE_RADIO)
   endif(FK_ENABLE_RADIO)
 
   option(FK_WIFI_ALWAYS_ON "If ON never turn off Wifi" OFF)

@@ -7,6 +7,10 @@ if (NOT DEFINED ARDUINO_IDE)
         break()
     endif()
   endforeach()
+
+  if (NOT DEFINED ARDUINO_IDE)
+    message(FATAL_ERROR "Unable to find Arduino IDE")
+  endif()
 endif()
 
 set(ARDUINO_PACKAGES_PATH "${ARDUINO_IDE}/packages")

@@ -29,7 +29,7 @@ set(ARDUINO_BOARD_CORE_LIBRARIES_PATH "${ARDUINO_BOARD_CORE_ROOT}/libraries")
 set(ARDUINO_LIBRARIES_PATH "${ARDUINO_IDE}/libraries")
 set(ARDUINO_CORE_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/cores/arduino/")
 set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}")
-set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_small.ld")
+set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld")
 set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY})
 
 set(ARDUINO_USB_STRING_FLAGS "-DUSB_MANUFACTURER=\"Arduino LLC\" -DUSB_PRODUCT=\"\\\"Arduino Zero\\\"\"")
@@ -40,6 +40,16 @@ set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}")
 
 set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
+
+function(enable_small_bootloader)
+  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_small.ld" PARENT_SCOPE)
+  message(STATUS "Linking for use with small bootloader.")
+endfunction()
+
+function(enable_large_bootloader)
+  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld" PARENT_SCOPE)
+  message(STATUS "Linking for use with large bootloader.")
+endfunction()
 
 # Not a huge fan of this. There doesn't seem to be a good way of setting C/C++
 # flags separately for a target, though.

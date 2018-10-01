@@ -177,15 +177,15 @@ SECTIONS
 
 	} > RAM
 
-    .bss :
-    {
-      . = ALIGN(4);
-      __bss_start__ = .;
-      *(.bss*)
-      *(COMMON)
-      . = ALIGN(4);
-      __bss_end__ = .;
-    } > RAM
+  .bss :
+  {
+    . = ALIGN(4);
+    __bss_start__ = .;
+    *(.bss*)
+    *(COMMON)
+    . = ALIGN(4);
+    __bss_end__ = .;
+  } > RAM
 
 	.noinit :
 	{
@@ -220,7 +220,7 @@ SECTIONS
 	__StackLimit = __StackTop - SIZEOF(.stack_dummy);
 	PROVIDE(__stack = __StackTop);
 
-	__ram_end__ = ORIGIN(RAM) + LENGTH(RAM) -1 ;
+	__ram_end__ = ORIGIN(RAM) + LENGTH(RAM) - 1;
 
 	/* Check if data + heap + stack exceeds RAM limit */
 	ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")

@@ -141,6 +141,18 @@ SECTIONS
 	} > FLASH
 	*/
 
+  /* This section holds baked in configuration. */
+  .config :
+  {
+    FILL(0xff)
+    . = ALIGN(4);
+    __text_config_start__ = .;
+    /* Force some data into the section. */
+    LONG(0xffffffff)
+    . = . + 1024;
+    __text_config_end__ = .;
+  } > FLASH = 0xff
+
 	__etext = .;
 
 	.data : AT (__etext)

@@ -17,29 +17,52 @@ set(ARDUINO_PACKAGES_PATH "${ARDUINO_IDE}/packages")
 set(ARDUINO_TOOLS_PATH "${ARDUINO_PACKAGES_PATH}/arduino/tools")
 set(ARM_TOOLS "${ARDUINO_TOOLS_PATH}/arm-none-eabi-gcc/4.8.3-2014q1/bin")
 
-set(ARDUINO_BOARD "arduino_zero")
-set(ARDUINO_MCU "cortex-m0plus")
-set(ARDUINO_FCPU "48000000L")
-
 set(ARDUINO_CMSIS_DIRECTORY "${ARDUINO_TOOLS_PATH}/CMSIS/4.5.0/CMSIS")
 set(ARDUINO_CMSIS_INCLUDE_DIRECTORY "${ARDUINO_CMSIS_DIRECTORY}/Include/")
-set(ARDUINO_DEVICE_DIRECTORY "${ARDUINO_TOOLS_PATH}/CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL")
-set(ARDUINO_BOARD_CORE_ROOT "${ARDUINO_PACKAGES_PATH}/adafruit/hardware/samd/1.0.22")
+set(ARDUINO_DEVICE_DIRECTORY "${ARDUINO_TOOLS_PATH}/CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL")
+set(ARDUINO_BOARD_CORE_ROOT "${ARDUINO_PACKAGES_PATH}/adafruit/hardware/samd/1.2.9")
 set(ARDUINO_BOARD_CORE_LIBRARIES_PATH "${ARDUINO_BOARD_CORE_ROOT}/libraries")
 set(ARDUINO_LIBRARIES_PATH "${ARDUINO_IDE}/libraries")
 set(ARDUINO_CORE_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/cores/arduino/")
-set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}")
 set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld")
-set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY})
-
-set(ARDUINO_USB_STRING_FLAGS "-DUSB_MANUFACTURER=\"Arduino LLC\" -DUSB_PRODUCT=\"\\\"Arduino Zero\\\"\"")
-set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=2491 -DARDUINO_M0PLUS=10605 -DARDUINO_SAMD_ZERO -DARDUINO_ARCH_SAMD -D__SAMD21G18A__ -DUSB_VID=0x2341 -DUSB_PID=0x804d -DUSBCON")
-set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}")
-set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-threadsafe-statics -fno-rtti -fno-exceptions")
-set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}")
 
 set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
+
+function(enable_m0)
+  set(ARDUINO_BOARD "feather_m0" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}" CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_MCU "cortex-m0plus" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_FCPU "48000000L" CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=2491 -DARDUINO_M0PLUS=10605 -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS -DARDUINO_ARCH_SAMD -D__SAMD21G18A__ -DUSB_VID=0x2341 -DUSB_PID=0x804d -DUSBCON" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-threadsafe-statics -fno-rtti -fno-exceptions" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY} CACHE INTERNAL "" FORCE)
+endfunction()
+
+function(enable_m4)
+  set(ARDUINO_BOARD "feather_m4" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}" CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_MCU "cortex-m4" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_FCPU "120000000L" CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=2491 -DARDUINO_ARCH_SAMD -D__SAMD51J19A__  -DADAFRUIT_FEATHER_M4_EXPRESS  -D__SAMD51__ -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-threadsafe-statics -fno-rtti -fno-exceptions" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb -larm_cortexM4lf_math -mfloat-abi=hard -mfpu=fpv4-sp-d16" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY} CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd51x19_bootloader_small.ld" CACHE INTERNAL "" FORCE)
+  message(STATUS "Enabled Cortex-M4")
+endfunction()
 
 function(enable_small_bootloader)
   set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_small.ld" PARENT_SCOPE)
@@ -79,39 +102,7 @@ function(configure_arduino_core_target)
     return()
   endif()
 
-  set(sources
-    ${ARDUINO_BOARD_DIRECTORY}/variant.cpp
-    ${ARDUINO_CORE_DIRECTORY}/pulse_asm.S
-    ${ARDUINO_CORE_DIRECTORY}/avr/dtostrf.c
-    ${ARDUINO_CORE_DIRECTORY}/wiring_shift.c
-    ${ARDUINO_CORE_DIRECTORY}/WInterrupts.c
-    ${ARDUINO_CORE_DIRECTORY}/pulse.c
-    ${ARDUINO_CORE_DIRECTORY}/cortex_handlers.c
-    ${ARDUINO_CORE_DIRECTORY}/wiring_digital.c
-    ${ARDUINO_CORE_DIRECTORY}/startup.c
-    ${ARDUINO_CORE_DIRECTORY}/hooks.c
-    ${ARDUINO_CORE_DIRECTORY}/wiring_private.c
-    ${ARDUINO_CORE_DIRECTORY}/itoa.c
-    ${ARDUINO_CORE_DIRECTORY}/delay.c
-    ${ARDUINO_CORE_DIRECTORY}/wiring_analog.c
-    ${ARDUINO_CORE_DIRECTORY}/USB/PluggableUSB.cpp
-    ${ARDUINO_CORE_DIRECTORY}/USB/USBCore.cpp
-    ${ARDUINO_CORE_DIRECTORY}/USB/samd21_host.c
-    ${ARDUINO_CORE_DIRECTORY}/USB/CDC.cpp
-    ${ARDUINO_CORE_DIRECTORY}/wiring.c
-    ${ARDUINO_CORE_DIRECTORY}/abi.cpp
-    ${ARDUINO_CORE_DIRECTORY}/Print.cpp
-    ${ARDUINO_CORE_DIRECTORY}/Reset.cpp
-    ${ARDUINO_CORE_DIRECTORY}/Stream.cpp
-    ${ARDUINO_CORE_DIRECTORY}/Tone.cpp
-    ${ARDUINO_CORE_DIRECTORY}/WMath.cpp
-    ${ARDUINO_CORE_DIRECTORY}/RingBuffer.cpp
-    ${ARDUINO_CORE_DIRECTORY}/SERCOM.cpp
-    ${ARDUINO_CORE_DIRECTORY}/Uart.cpp
-    ${ARDUINO_CORE_DIRECTORY}/WString.cpp
-    ${ARDUINO_CORE_DIRECTORY}/new.cpp
-    ${ARDUINO_CORE_DIRECTORY}/IPAddress.cpp
-  )
+  file(GLOB_RECURSE sources ${ARDUINO_BOARD_DIRECTORY}/variant.cpp ${ARDUINO_CORE_DIRECTORY}/*.c ${ARDUINO_CORE_DIRECTORY}/*.cpp)
 
   add_library(arduino-core STATIC ${sources})
 
@@ -125,6 +116,8 @@ function(enable_arduino_toolchain)
   set(CMAKE_ASM_COMPILER "${ARM_TOOLS}/arm-none-eabi-gcc" PARENT_SCOPE)
   set(CMAKE_AR "${ARM_TOOLS}/arm-none-eabi-ar" PARENT_SCOPE)
   set(CMAKE_RANLIB "${ARM_TOOLS}/arm-none-eabi-ranlib" PARENT_SCOPE)
+
+  enable_m0()
 endfunction()
 
 function(configure_firmware_linker_script target_name script)
@@ -161,9 +154,11 @@ function(configure_firmware_link target_name additional_libraries)
     set(linker_script ${${target_name}_LINKER})
   endif()
 
+  string(REPLACE " " ";" ldflags ${ARDUINO_BOARD_LDFLAGS})
   add_custom_command(TARGET ${target_name}.elf POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
-    --specs=nano.specs --specs=nosys.specs -mcpu=${ARDUINO_MCU} -mthumb -Wl,--cref -Wl,--check-sections
+    --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections
+    ${ldflags}
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/

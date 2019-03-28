@@ -140,6 +140,13 @@ function(fk_core_apply_configuration target_name)
     target_compile_options(${library_target} PUBLIC -DFK_DISABLE_FLASH)
   endif(FK_ENABLE_FLASH)
 
+  option(FK_ENABLE_FUEL_GAUGE "Enable fuel gauge." ON)
+  if(FK_ENABLE_FUEL_GAUGE)
+    target_compile_options(${library_target} PUBLIC -DFK_ENABLE_FUEL_GAUGE)
+  else()
+    target_compile_options(${library_target} PUBLIC -DFK_DISABLE_FUEL_GAUGE)
+  endif(FK_ENABLE_FUEL_GAUGE)
+
   option(FK_ENABLE_LOW_POWER_SLEEP "Enable low power sleep." ON)
   if(FK_ENABLE_LOW_POWER_SLEEP)
     target_compile_options(${library_target} PUBLIC -DFK_ENABLE_LOW_POWER_SLEEP)

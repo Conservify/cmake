@@ -28,56 +28,105 @@ set(ARDUINO_CORE_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/cores/arduino/")
 set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
 
-function(enable_m0)
-  set(ARDUINO_BOARD "feather_m0" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}" CACHE INTERNAL "" FORCE)
+# This is buggy.
+set(module_path ${CMAKE_MODULE_PATH})
 
-  set(ARDUINO_MCU "cortex-m0plus" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_FCPU "48000000L" CACHE INTERNAL "" FORCE)
+function(enable_m0_target target_name)
+  set(target_board "feather_m0")
+  set(target_mcu "cortex-m0plus")
+  set(target_fcpu "48000000l")
 
-  set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=2491 -DARDUINO_M0PLUS=10605 -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS -DARDUINO_ARCH_SAMD -D__SAMD21G18A__ -DUSB_VID=0x2341 -DUSB_PID=0x804d -DUSBCON" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-threadsafe-statics -fno-rtti -fno-exceptions" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
+  set(target_board_directory "${ARDUINO_BOARD_CORE_ROOT}/variants/${target_board}")
 
-  set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_BOARD_LIBRARIES "-lm -larm_cortexM0l_math" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY} CACHE INTERNAL "" FORCE)
+  set(target_board_flags "-DF_CPU=${target_fcpu} -DARDUINO=2491 -DARDUINO_M0PLUS=10605 -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS -DARDUINO_ARCH_SAMD -D__SAMD21G18A__ -DUSB_VID=0x2341 -DUSB_PID=0x804d -DUSBCON")
+  set(target_c_flags "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${target_mcu} -mthumb ${target_board_flags}")
+  set(target_cxx_flags "${target_c_flags} -fno-threadsafe-statics -fno-rtti -fno-exceptions")
+  set(target_asm_flags "-g -x assembler-with-cpp ${target_board_flags}")
 
-  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld" CACHE INTERNAL "" FORCE)
+  set(target_board_ldflags "-mcpu=${target_mcu} -mthumb")
+  set(target_board_libraries "-lm -larm_cortexM0l_math")
+  set(target_includes ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${target_board_directory})
 
-  message(STATUS "Enabled Cortex-M0")
+  set(target_bootloader "${module_path}/linking/samd21x18_bootloader_large.ld")
+
+  set_target_properties(${target_name} PROPERTIES
+    target_board ${target_board}
+    target_board_directory ${target_board_directory}
+    target_board_flags ${target_board_flags}
+    target_c_flags ${target_c_flags}
+    target_cxx_flags ${target_cxx_flags}
+    target_asm_flags ${target_asm_flags}
+    target_board_ldflags ${target_board_ldflags}
+    target_board_libraries ${target_board_libraries}
+    target_includes "${target_includes}"
+    target_bootloader ${target_bootloader}
+  )
+
+  message(STATUS "Enabled Cortex-M0 for ${target_name}")
 endfunction()
 
-function(enable_m4)
-  set(ARDUINO_BOARD "feather_m4" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_BOARD_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/variants/${ARDUINO_BOARD}" CACHE INTERNAL "" FORCE)
+function(enable_m4_target target_name)
+  set(target_board "feather_m4")
+  set(target_mcu "cortex-m4")
+  set(target_fcpu "120000000L")
 
-  set(ARDUINO_MCU "cortex-m4" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_FCPU "120000000L" CACHE INTERNAL "" FORCE)
+  set(target_board_directory "${ARDUINO_BOARD_CORE_ROOT}/variants/${target_board}")
 
-  set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=10803 -DARDUINO_ARCH_SAMD -D__SAMD51J19A__ -DARDUINO_FEATHER_M4 -DADAFRUIT_FEATHER_M4_EXPRESS -D__SAMD51__ -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON -DENABLE_CACHE -DMAX_SPI=24000000" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-threadsafe-statics -fno-rtti -fno-exceptions" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
+  set(target_board_flags "-DF_CPU=${target_fcpu} -DARDUINO=10803 -DARDUINO_ARCH_SAMD -D__SAMD51J19A__ -DARDUINO_FEATHER_M4 -DADAFRUIT_FEATHER_M4_EXPRESS -D__SAMD51__ -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON -DENABLE_CACHE -DMAX_SPI=24000000")
+  set(target_c_flags "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${target_mcu} -mthumb ${target_board_flags}")
+  set(target_cxx_flags "${target_c_flags} -fno-threadsafe-statics -fno-rtti -fno-exceptions")
+  set(target_asm_flags "-g -x assembler-with-cpp ${target_board_flags}")
 
-  set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_BOARD_LIBRARIES "-larm_cortexM4lf_math -mfloat-abi=hard -mfpu=fpv4-sp-d16" CACHE INTERNAL "" FORCE)
-  set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY} CACHE INTERNAL "" FORCE)
+  set(target_board_ldflags "-mcpu=${target_mcu} -mthumb")
+  set(target_board_libraries "-larm_cortexM4lf_math -mfloat-abi=hard -mfpu=fpv4-sp-d16")
+  set(target_includes ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${target_board_directory})
 
-  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd51x19_bootloader_small.ld" CACHE INTERNAL "" FORCE)
+  set(target_bootloader "${module_path}/linking/samd51x19_bootloader_small.ld")
 
-  message(STATUS "Enabled Cortex-M4")
+  set_target_properties(${target_name} PROPERTIES
+    target_board ${target_board}
+    target_board_directory ${target_board_directory}
+    target_board_flags ${target_board_flags}
+    target_c_flags ${target_c_flags}
+    target_cxx_flags ${target_cxx_flags}
+    target_asm_flags ${target_asm_flags}
+    target_board_ldflags ${target_board_ldflags}
+    target_board_libraries ${target_board_libraries}
+    target_includes "${target_includes}"
+    target_bootloader ${target_bootloader}
+  )
+
+  message(STATUS "Enabled Cortex-M4 for ${target_name}")
 endfunction()
 
-function(enable_small_bootloader)
-  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_small.ld" PARENT_SCOPE)
+function(enable_small_bootloader_target target_name)
+  set_target_properties(${target_name} PROPERTIES target_bootloader "${module_path}/linking/samd21x18_bootloader_small.ld")
+
   message(STATUS "Linking for use with small bootloader.")
 endfunction()
 
-function(enable_large_bootloader)
-  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld" PARENT_SCOPE)
+function(enable_large_bootloader_target target_name)
+  set_target_properties(${target_name} PROPERTIES target_bootloader "${module_path}/linking/samd21x18_bootloader_large.ld")
+
   message(STATUS "Linking for use with large bootloader.")
+endfunction()
+
+function(enable_m0)
+  message(STATUS "Enabled Cortex-M0")
+  set(ARDUINO_BOARD "feather_m0" CACHE INTERNAL "" FORCE)
+endfunction()
+
+function(enable_m4)
+  message(STATUS "Enabled Cortex-M4")
+  set(ARDUINO_BOARD "feather_m4" CACHE INTERNAL "" FORCE)
+endfunction()
+
+function(enable_small_bootloader)
+  message(STATUS "enable_small_bootloader() is deprecated")
+endfunction()
+
+function(enable_large_bootloader)
+  message(STATUS "enable_large_bootloader() is deprecated")
 endfunction()
 
 # Not a huge fan of this. There doesn't seem to be a good way of setting C/C++
@@ -100,22 +149,33 @@ function(apply_compile_flags files new_c_flags new_cxx_flags new_asm_flags)
 endfunction()
 
 function(configure_compile_options target_name sources)
-  target_include_directories(${target_name} PUBLIC "${ARDUINO_INCLUDES}")
+  get_target_property(target_c_flags ${target_name} target_c_flags)
+  get_target_property(target_cxx_flags ${target_name} target_cxx_flags)
+  get_target_property(target_asm_flags ${target_name} target_asm_flags)
+  get_target_property(target_includes ${target_name} target_includes)
+
+  target_include_directories(${target_name} PUBLIC "${target_includes}")
   set_target_properties(${target_name} PROPERTIES C_STANDARD 11)
   set_target_properties(${target_name} PROPERTIES CXX_STANDARD 11)
-  apply_compile_flags("${sources}" ${ARDUINO_C_FLAGS} ${ARDUINO_CXX_FLAGS} ${ARDUINO_ASM_FLAGS})
+  apply_compile_flags("${sources}" ${target_c_flags} ${target_cxx_flags} ${target_asm_flags})
 endfunction()
 
-function(configure_arduino_core_target)
-  if(TARGET arduino-core)
+function(configure_arduino_core_target target_board)
+  set(core_target_name "arduino-core-${target_board}")
+
+  if(TARGET ${core_target_name})
     return()
   endif()
 
-  file(GLOB_RECURSE sources ${ARDUINO_BOARD_DIRECTORY}/variant.cpp ${ARDUINO_CORE_DIRECTORY}/*.c ${ARDUINO_CORE_DIRECTORY}/*.cpp)
+  set(target_board_directory "${ARDUINO_BOARD_CORE_ROOT}/variants/${target_board}")
 
-  add_library(arduino-core STATIC ${sources})
+  file(GLOB_RECURSE sources ${target_board_directory}/variant.cpp ${ARDUINO_CORE_DIRECTORY}/*.c ${ARDUINO_CORE_DIRECTORY}/*.cpp)
 
-  configure_compile_options(arduino-core "${sources}")
+  add_library(${core_target_name} STATIC ${sources})
+
+  configure_target_board(${core_target_name})
+
+  configure_compile_options(${core_target_name} "${sources}")
 endfunction()
 
 # Call from the project.
@@ -129,12 +189,28 @@ function(enable_arduino_toolchain)
   enable_m0()
 endfunction()
 
+function(configure_target_board target_name)
+  if("${ARDUINO_BOARD}" STREQUAL "feather_m0")
+    enable_m0_target(${target_name})
+  endif()
+  if("${ARDUINO_BOARD}" STREQUAL "feather_m4")
+    enable_m4_target(${target_name})
+  endif()
+endfunction()
+
 function(configure_firmware_linker_script target_name script)
-  set(${target_name}_LINKER ${script} PARENT_SCOPE)
+  set_target_properties(${target_name} PROPERTIES target_bootloader ${script})
 endfunction()
 
 function(configure_firmware_link target_name additional_libraries)
   get_target_property(libraries ${target_name} LINK_LIBRARIES)
+
+  get_target_property(target_board_directory ${target_name} target_board_directory)
+  get_target_property(target_board_flags ${target_name} target_board_flags)
+  get_target_property(target_board_ldflags ${target_name} target_board_ldflags)
+  get_target_property(target_board_libraries ${target_name} target_board_libraries)
+  get_target_property(target_includes ${target_name} target_includes)
+  get_target_property(target_bootloader ${target_name} target_bootloader)
 
   set(unique_libraries ${target_name})
   if(NOT "${libraries}" STREQUAL "libraries-NOTFOUND")
@@ -158,13 +234,10 @@ function(configure_firmware_link target_name additional_libraries)
 
   add_dependencies(${target_name}.elf ${target_name})
 
-  set(linker_script ${ARDUINO_BOOTLOADER})
-  if(DEFINED ${target_name}_LINKER)
-    set(linker_script ${${target_name}_LINKER})
-  endif()
+  set(linker_script ${target_bootloader})
 
-  string(REPLACE " " ";" ldflags ${ARDUINO_BOARD_LDFLAGS})
-  string(REPLACE " " ";" board_libraries ${ARDUINO_BOARD_LIBRARIES})
+  string(REPLACE " " ";" ldflags ${target_board_ldflags})
+  string(REPLACE " " ";" board_libraries ${target_board_libraries})
 
   add_custom_command(TARGET ${target_name}.elf POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
@@ -198,24 +271,29 @@ endfunction()
 
 function(add_arduino_library target_name sources)
   add_library(${target_name} STATIC ${sources})
+  configure_target_board(${target_name})
   configure_compile_options(${target_name} "${sources}")
 endfunction()
 
 function(add_arduino_firmware target_name)
   get_target_property(updated_sources ${target_name} SOURCES)
+  get_target_property(target_board ${target_name} target_board)
+
   list(INSERT updated_sources 0 ${ARDUINO_CORE_DIRECTORY}/main.cpp)
   configure_compile_options(${target_name} "${updated_sources}")
   target_sources(${target_name} PUBLIC ${updated_sources})
 
-  configure_arduino_core_target()
+  configure_arduino_core_target(${target_board})
 
-  target_link_libraries(${target_name} arduino-core)
+  target_link_libraries(${target_name} arduino-core-${target_board})
 
   configure_firmware_link(${target_name} "")
 endfunction()
 
 function(add_arduino_bootloader target_name)
-  configure_arduino_core_target()
+  get_target_property(target_board ${target_name} target_board)
+
+  configure_arduino_core_target(${target_board})
 
   configure_firmware_link(${target_name} "")
 endfunction()

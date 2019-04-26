@@ -24,7 +24,6 @@ set(ARDUINO_BOARD_CORE_ROOT "${ARDUINO_PACKAGES_PATH}/adafruit/hardware/samd/1.2
 set(ARDUINO_BOARD_CORE_LIBRARIES_PATH "${ARDUINO_BOARD_CORE_ROOT}/libraries")
 set(ARDUINO_LIBRARIES_PATH "${ARDUINO_IDE}/libraries")
 set(ARDUINO_CORE_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/cores/arduino/")
-set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld")
 
 set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
@@ -42,7 +41,12 @@ function(enable_m0)
   set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
 
   set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_LIBRARIES "-lm -larm_cortexM0l_math" CACHE INTERNAL "" FORCE)
   set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY} CACHE INTERNAL "" FORCE)
+
+  set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd21x18_bootloader_large.ld" CACHE INTERNAL "" FORCE)
+
+  message(STATUS "Enabled Cortex-M0")
 endfunction()
 
 function(enable_m4)
@@ -52,15 +56,17 @@ function(enable_m4)
   set(ARDUINO_MCU "cortex-m4" CACHE INTERNAL "" FORCE)
   set(ARDUINO_FCPU "120000000L" CACHE INTERNAL "" FORCE)
 
-  set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=2491 -DARDUINO_ARCH_SAMD -D__SAMD51J19A__  -DADAFRUIT_FEATHER_M4_EXPRESS  -D__SAMD51__ -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_FLAGS "-DF_CPU=${ARDUINO_FCPU} -DARDUINO=10803 -DARDUINO_ARCH_SAMD -D__SAMD51J19A__ -DARDUINO_FEATHER_M4 -DADAFRUIT_FEATHER_M4_EXPRESS -D__SAMD51__ -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON -DENABLE_CACHE -DMAX_SPI=24000000" CACHE INTERNAL "" FORCE)
   set(ARDUINO_C_FLAGS "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${ARDUINO_MCU} -mthumb ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
   set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-threadsafe-statics -fno-rtti -fno-exceptions" CACHE INTERNAL "" FORCE)
   set(ARDUINO_ASM_FLAGS "-g -x assembler-with-cpp ${ARDUINO_BOARD_FLAGS}" CACHE INTERNAL "" FORCE)
 
-  set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb -larm_cortexM4lf_math -mfloat-abi=hard -mfpu=fpv4-sp-d16" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_LDFLAGS "-mcpu=${ARDUINO_MCU} -mthumb" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_LIBRARIES "-larm_cortexM4lf_math -mfloat-abi=hard -mfpu=fpv4-sp-d16" CACHE INTERNAL "" FORCE)
   set(ARDUINO_INCLUDES ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${ARDUINO_BOARD_DIRECTORY} CACHE INTERNAL "" FORCE)
 
   set(ARDUINO_BOOTLOADER "${CMAKE_MODULE_PATH}/linking/samd51x19_bootloader_small.ld" CACHE INTERNAL "" FORCE)
+
   message(STATUS "Enabled Cortex-M4")
 endfunction()
 
@@ -158,6 +164,8 @@ function(configure_firmware_link target_name additional_libraries)
   endif()
 
   string(REPLACE " " ";" ldflags ${ARDUINO_BOARD_LDFLAGS})
+  string(REPLACE " " ";" board_libraries ${ARDUINO_BOARD_LIBRARIES})
+
   add_custom_command(TARGET ${target_name}.elf POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
     --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections
@@ -165,7 +173,7 @@ function(configure_firmware_link target_name additional_libraries)
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/
-    ${library_files} ${additional_libraries}
+    ${library_files} ${additional_libraries} ${board_libraries}
   )
 
   add_custom_target(${target_name}.bin)
@@ -203,9 +211,7 @@ function(add_arduino_firmware target_name)
 
   target_link_libraries(${target_name} arduino-core)
 
-  # set(ld_flags -lm -larm_cortexM0l_math -lc -u _printf_float)
-  set(ld_flags -lm -larm_cortexM0l_math)
-  configure_firmware_link(${target_name} "${ld_flags}")
+  configure_firmware_link(${target_name} "")
 endfunction()
 
 function(add_arduino_bootloader target_name)

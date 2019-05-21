@@ -212,7 +212,7 @@ function(configure_firmware_link target_name additional_libraries)
   get_target_property(target_includes ${target_name} target_includes)
   get_target_property(target_bootloader ${target_name} target_bootloader)
 
-  set(unique_libraries ${target_name})
+  set(unique_libraries "")
   if(NOT "${libraries}" STREQUAL "libraries-NOTFOUND")
     foreach(library ${libraries})
       get_property(libs TARGET ${library} PROPERTY INTERFACE_LINK_LIBRARIES)
@@ -230,6 +230,10 @@ function(configure_firmware_link target_name additional_libraries)
     list(APPEND library_files ${library_dir}/lib${library}.a)
   endforeach()
 
+  set(whole_library_files)
+  get_target_property(library_dir ${target_name} BINARY_DIR)
+  list(APPEND whole_library_files ${library_dir}/lib${target_name}.a)
+
   add_custom_target(${target_name}.elf)
 
   add_dependencies(${target_name}.elf ${target_name})
@@ -246,6 +250,7 @@ function(configure_firmware_link target_name additional_libraries)
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/
+    -Wl,--whole-archive ${whole_library_files} -Wl,--no-whole-archive
     ${library_files} ${additional_libraries} ${board_libraries}
   )
 

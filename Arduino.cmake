@@ -72,7 +72,13 @@ function(enable_m4_target target_name)
 
   set(target_board_directory "${ARDUINO_BOARD_CORE_ROOT}/variants/${target_board}")
 
-  set(target_board_flags "-DF_CPU=${target_fcpu} -DARDUINO=10803 -DARDUINO_ARCH_SAMD -D__SAMD51J19A__ -DARDUINO_FEATHER_M4 -DADAFRUIT_FEATHER_M4_EXPRESS -D__SAMD51__ -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON -DENABLE_CACHE -DMAX_SPI=24000000")
+  if(FALSE)
+    set(specific_board "-DARDUINO_FEATHER_M4 -DADAFRUIT_FEATHER_M4_EXPRESS -D__SAMD51J19A__")
+  else()
+    set(specific_board "-DARDUINO_GRAND_CENTRAL_M4 -DADAFRUIT_GRAND_CENTRAL_M4 -D__SAMD51P20A__")
+  endif()
+
+  set(target_board_flags "-DF_CPU=${target_fcpu} -DARDUINO=10803 -DARDUINO_ARCH_SAMD -D__SAMD51__ ${specific_board} -D__FPU_PRESENT -DARM_MATH_CM4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DUSB_VID=0x239A -DUSB_PID=0x8022 -DUSBCON -DENABLE_CACHE -DMAX_SPI=24000000")
   set(target_c_flags "-g -Os -s -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -mcpu=${target_mcu} -mthumb ${target_board_flags}")
   set(target_cxx_flags "${target_c_flags} -fno-threadsafe-statics -fno-rtti -fno-exceptions")
   set(target_asm_flags "-g -x assembler-with-cpp -mcpu=${target_mcu} -mthumb ${target_board_flags}")

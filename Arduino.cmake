@@ -31,8 +31,7 @@ set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
 # This is buggy.
 set(module_path ${CMAKE_MODULE_PATH})
 
-function(enable_m0_target target_name)
-  set(target_board "feather_m0")
+function(enable_m0_target target_name target_board)
   set(target_mcu "cortex-m0plus")
   set(target_fcpu "48000000l")
 
@@ -65,8 +64,7 @@ function(enable_m0_target target_name)
   message(STATUS "Enabled Cortex-M0 for ${target_name}")
 endfunction()
 
-function(enable_m4_target target_name)
-  set(target_board "feather_m4")
+function(enable_m4_target target_name target_board)
   set(target_mcu "cortex-m4")
   set(target_fcpu "120000000L")
 
@@ -102,7 +100,7 @@ function(enable_m4_target target_name)
     target_bootloader ${target_bootloader}
   )
 
-  message(STATUS "Enabled Cortex-M4 for ${target_name}")
+  message(STATUS "Enabled Cortex-M4 for ${target_name} / ${target_board}")
 endfunction()
 
 function(enable_small_bootloader_target target_name)
@@ -119,12 +117,16 @@ endfunction()
 
 function(enable_m0)
   message(STATUS "Enabled Cortex-M0")
-  set(ARDUINO_BOARD "feather_m0" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_M0 "feather_m0" CACHE INTERNAL "" FORCE)
+endfunction()
+
+function(enable_m4_board board)
+  message(STATUS "Enabled Cortex-M4 (board = ${board})")
+  set(ARDUINO_BOARD_M4 "${board}" CACHE INTERNAL "" FORCE)
 endfunction()
 
 function(enable_m4)
-  message(STATUS "Enabled Cortex-M4")
-  set(ARDUINO_BOARD "feather_m4" CACHE INTERNAL "" FORCE)
+  enable_m4_board("feather_m4")
 endfunction()
 
 function(enable_small_bootloader)
@@ -196,11 +198,11 @@ function(enable_arduino_toolchain)
 endfunction()
 
 function(configure_target_board target_name)
-  if("${ARDUINO_BOARD}" STREQUAL "feather_m0")
-    enable_m0_target(${target_name})
+  if(NOT "${ARDUINO_BOARD_M0}" STREQUAL "")
+    enable_m0_target(${target_name} ${ARDUINO_BOARD_M0})
   endif()
-  if("${ARDUINO_BOARD}" STREQUAL "feather_m4")
-    enable_m4_target(${target_name})
+  if(NOT "${ARDUINO_BOARD_M4}" STREQUAL "")
+    enable_m4_target(${target_name} ${ARDUINO_BOARD_M4})
   endif()
 endfunction()
 

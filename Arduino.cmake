@@ -322,26 +322,41 @@ function(add_external_arduino_library name)
 
   set(path "${${name}_PATH}")
   set(recurse "${${name}_RECURSE}")
-  set(sources_path ${path})
 
+  set(source_paths)
   if (EXISTS "${path}/src")
-    set(sources_path "${path}/src")
+    list(APPEND source_paths "${path}/src")
+  endif()
+  if (EXISTS "${path}/cppsrc")
+    list(APPEND source_paths "${path}/cppsrc")
+  endif()
+  if (EXISTS "${path}/csrc")
+    list(APPEND source_paths "${path}/csrc")
   endif()
 
-  message(STATUS "Library: ${name} (${sources_path})")
+  if (NOT source_paths)
+    list(APPEND source_paths ${path})
+  endif()
+
+  message(STATUS "Library: ${name} (${source_paths})")
 
   if (NOT TARGET ${name})
-    if (recurse)
-      file(GLOB_RECURSE sources ${sources_path}/*.c ${sources_path}/*.cpp ${sources_path}/*.S)
-    else()
-      file(GLOB sources ${sources_path}/*.c ${sources_path}/*.cpp ${sources_path}/*.S)
-    endif()
+    set(sources)
+
+    foreach(source_path ${source_paths})
+      if (recurse)
+        file(GLOB_RECURSE path_sources ${source_path}/*.c ${source_path}/*.cpp ${source_path}/*.S)
+      else()
+        file(GLOB path_sources ${source_path}/*.c ${source_path}/*.cpp ${source_path}/*.S)
+      endif()
+      list(APPEND sources ${path_sources})
+    endforeach()
 
     add_arduino_library(${name} "${sources}")
 
     target_include_directories(${name}
-      PUBLIC ${sources_path}
-      PRIVATE ${sources_path}
+      PUBLIC ${source_paths}
+      PRIVATE ${source_paths}
     )
   endif()
 endfunction()

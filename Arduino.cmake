@@ -28,8 +28,12 @@ set(ARDUINO_CORE_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/cores/arduino/")
 set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
 
-# This is buggy.
-set(module_path ${CMAKE_MODULE_PATH})
+# This used to be more buggy.
+foreach(mp ${CMAKE_MODULE_PATH})
+  if(EXISTS ${mp}/Arduino.cmake)
+    set(module_path ${mp})
+  endif()
+endforeach()
 
 function(enable_m0_target target_name target_board)
   set(target_mcu "cortex-m0plus")

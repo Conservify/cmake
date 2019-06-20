@@ -250,6 +250,7 @@ function(configure_firmware_link target_name additional_libraries)
 
   add_dependencies(${target_name}.elf ${target_name})
 
+  get_filename_component(linker_script_include ${target_bootloader} DIRECTORY)
   set(linker_script ${target_bootloader})
 
   string(REPLACE " " ";" ldflags ${target_board_ldflags})
@@ -261,7 +262,7 @@ function(configure_firmware_link target_name additional_libraries)
     ${ldflags}
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
-    -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/
+    -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ -L${linker_script_include}
     -Wl,--whole-archive ${whole_library_files} -Wl,--no-whole-archive
     ${library_files} ${additional_libraries} ${board_libraries}
   )

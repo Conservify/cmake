@@ -122,11 +122,13 @@ endfunction()
 function(enable_m0)
   message(STATUS "Enabled Cortex-M0")
   set(ARDUINO_BOARD_M0 "feather_m0" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_M4 "" CACHE INTERNAL "" FORCE)
 endfunction()
 
 function(enable_m4_board board)
   message(STATUS "Enabled Cortex-M4 (board = ${board})")
   set(ARDUINO_BOARD_M4 "${board}" CACHE INTERNAL "" FORCE)
+  set(ARDUINO_BOARD_M0 "" CACHE INTERNAL "" FORCE)
 endfunction()
 
 function(enable_m4)

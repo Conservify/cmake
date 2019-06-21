@@ -258,11 +258,13 @@ function(configure_firmware_link target_name additional_libraries)
   string(REPLACE " " ";" ldflags ${target_board_ldflags})
   string(REPLACE " " ";" board_libraries ${target_board_libraries})
 
+  # -Wl,--unresolved-symbols=ignore-in-object-files
+
   add_custom_command(TARGET ${target_name}.elf POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
     --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections
     ${ldflags}
-    -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
+    -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align -Wl,--emit-relocs
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ -L${linker_script_include}
     -Wl,--whole-archive ${whole_library_files} -Wl,--no-whole-archive

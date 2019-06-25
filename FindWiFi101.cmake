@@ -2,7 +2,9 @@ if (TARGET WiFi101)
   return()
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+if (${WiFi101_PATH} STREQUAL "")
+  include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+endif()
 
 set(WiFi101_RECURSE True)
 

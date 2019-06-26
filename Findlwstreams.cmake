@@ -2,8 +2,14 @@ if(TARGET lwstreams)
   return()
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
+if(${TARGET_ARCH} MATCHES "amd64")
+  file(GLOB sources ${lwstreams_PATH}/src/lwstreams/*.cpp)
 
-set(lwstreams_RECURSE True)
+  add_library(lwstreams STATIC ${sources})
 
-add_external_arduino_library(lwstreams)
+  target_include_directories(lwstreams PUBLIC ${lwstreams_PATH}/src)
+else()
+  set(lwstreams_RECURSE True)
+
+  add_external_arduino_library(lwstreams)
+endif()

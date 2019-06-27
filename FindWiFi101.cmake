@@ -2,7 +2,7 @@ if (TARGET WiFi101)
   return()
 endif()
 
-if (${WiFi101_PATH} STREQUAL "")
+if ("${WiFi101_PATH}" STREQUAL "")
   include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake)
 endif()
 

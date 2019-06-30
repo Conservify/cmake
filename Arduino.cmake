@@ -226,7 +226,8 @@ function(configure_firmware_link target_name additional_libraries)
   get_target_property(target_includes ${target_name} target_includes)
   get_target_property(target_bootloader ${target_name} target_bootloader)
 
-  set(unique_libraries "")
+  set(dependencies)
+  set(unique_libraries)
   if(NOT "${libraries}" STREQUAL "libraries-NOTFOUND")
     foreach(library ${libraries})
       get_property(libs TARGET ${library} PROPERTY INTERFACE_LINK_LIBRARIES)
@@ -260,10 +261,13 @@ function(configure_firmware_link target_name additional_libraries)
 
   # -Wl,--unresolved-symbols=ignore-in-object-files
 
-  add_custom_command(TARGET ${target_name}.elf POST_BUILD
+  add_custom_command(
+    # TARGET ${target_name}.elf
+    OUTPUT ${target_name}.elf
+    DEPENDS ${libraries} ${target_name} 
+    POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
-    --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections
-    ${ldflags}
+    --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections ${ldflags}
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align -Wl,--emit-relocs
     -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ -L${linker_script_include}
@@ -275,14 +279,20 @@ function(configure_firmware_link target_name additional_libraries)
 
   add_dependencies(${target_name}.bin ${target_name}.elf)
 
-  add_custom_command(TARGET ${target_name}.bin POST_BUILD COMMAND ${ARDUINO_OBJCOPY} -O binary
-    ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
-    ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
+  add_custom_command( # TARGET ${target_name}.bin
+    POST_BUILD
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
+    COMMAND ${ARDUINO_OBJCOPY} -O binary ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
 
-  add_custom_command(TARGET ${target_name}.bin POST_BUILD COMMAND ${ARDUINO_NM} --print-size --size-sort --radix=d
-    ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf > ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms)
+  add_custom_command( # TARGET ${target_name}.bin
+    POST_BUILD
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
+    COMMAND ${ARDUINO_NM} --print-size --size-sort --radix=d ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf > ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms)
 
-  add_custom_target(${target_name}_bin ALL DEPENDS ${target_name}.bin)
+  # add_custom_target(${target_name}_bin ALL DEPENDS ${target_name}.bin)
+  add_custom_target(${target_name}_bin ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
 
   set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms"

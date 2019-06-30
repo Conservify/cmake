@@ -239,13 +239,20 @@ function(configure_firmware_link target_name additional_libraries)
   list(REVERSE unique_libraries)
   list(REMOVE_DUPLICATES unique_libraries)
   list(REVERSE unique_libraries)
+
   set(library_files)
+  set(whole_library_files)
+
   foreach(library ${unique_libraries})
     get_target_property(library_dir ${library} BINARY_DIR)
-    list(APPEND library_files ${library_dir}/lib${library}.a)
+
+    if(${library} STREQUAL "ConservifyOS")
+      list(APPEND whole_library_files ${library_dir}/lib${library}.a)
+    else()
+      list(APPEND library_files ${library_dir}/lib${library}.a)
+    endif()
   endforeach()
 
-  set(whole_library_files)
   get_target_property(library_dir ${target_name} BINARY_DIR)
   list(APPEND whole_library_files ${library_dir}/lib${target_name}.a)
 

@@ -234,11 +234,15 @@ function(configure_firmware_link target_name additional_libraries)
       list(APPEND unique_libraries ${library})
       list(APPEND unique_libraries ${libs})
     endforeach()
+    list(APPEND dependencies ${libraries})
   endif()
+  list(APPEND dependencies  ${target_name})
 
-  list(REVERSE unique_libraries)
-  list(REMOVE_DUPLICATES unique_libraries)
-  list(REVERSE unique_libraries)
+  if("${unique_libraries}")
+    list(REVERSE unique_libraries)
+    list(REMOVE_DUPLICATES unique_libraries)
+    list(REVERSE unique_libraries)
+  endif()
 
   set(library_files)
   set(whole_library_files)
@@ -271,7 +275,7 @@ function(configure_firmware_link target_name additional_libraries)
   add_custom_command(
     # TARGET ${target_name}.elf
     OUTPUT ${target_name}.elf
-    DEPENDS ${libraries} ${target_name} 
+    DEPENDS ${dependencies}
     POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
     --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections ${ldflags}

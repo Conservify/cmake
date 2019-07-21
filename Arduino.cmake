@@ -260,9 +260,11 @@ function(configure_firmware_link target_name additional_libraries)
   get_target_property(library_dir ${target_name} BINARY_DIR)
   list(APPEND whole_library_files ${library_dir}/lib${target_name}.a)
 
-  add_custom_target(${target_name}.elf)
-
-  add_dependencies(${target_name}.elf ${target_name})
+  set(elf_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf)
+  set(bin_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
+  set(map_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map)
+  set(elf_target ${target_name}.elf)
+  set(bin_target ${target_name}.bin)
 
   get_filename_component(linker_script_include ${target_bootloader} DIRECTORY)
   set(linker_script ${target_bootloader})
@@ -270,46 +272,29 @@ function(configure_firmware_link target_name additional_libraries)
   string(REPLACE " " ";" ldflags ${target_board_ldflags})
   string(REPLACE " " ";" board_libraries ${target_board_libraries})
 
-  # -Wl,--unresolved-symbols=ignore-in-object-files
-
   add_custom_command(
-    # TARGET ${target_name}.elf
-    OUTPUT ${target_name}.elf
+    OUTPUT ${elf_file}
     DEPENDS ${dependencies}
-    POST_BUILD
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
     --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections ${ldflags}
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align -Wl,--emit-relocs
-    -Wl,-Map,${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map -o ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
+    -Wl,-Map,${map_file} -o ${elf_file}
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ -L${linker_script_include}
     -Wl,--whole-archive ${whole_library_files} -Wl,--no-whole-archive
     ${library_files} ${additional_libraries} ${board_libraries}
   )
+  add_custom_target(${elf_target} ALL DEPENDS ${elf_file})
+  add_dependencies(${elf_target} ${target_name})
 
-  add_custom_target(${target_name}.bin)
+  add_custom_command(
+    OUTPUT ${bin_file}
+    DEPENDS ${elf_file}
+    COMMAND ${ARDUINO_OBJCOPY} -O binary ${elf_file} ${bin_file}
+  )
+  add_custom_target(${bin_target} ALL DEPENDS ${bin_file})
+  add_dependencies(${bin_target} ${elf_target})
 
-  add_dependencies(${target_name}.bin ${target_name}.elf)
-
-  add_custom_command( # TARGET ${target_name}.bin
-    POST_BUILD
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
-    COMMAND ${ARDUINO_OBJCOPY} -O binary ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
-
-  add_custom_command( # TARGET ${target_name}.bin
-    POST_BUILD
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf
-    COMMAND ${ARDUINO_NM} --print-size --size-sort --radix=d ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf > ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms)
-
-  # add_custom_target(${target_name}_bin ALL DEPENDS ${target_name}.bin)
-  add_custom_target(${target_name}_bin ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
-
-  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.syms"
-    "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf"
-    "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin"
-    "${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map")
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${elf_file}" "${bin_file}" "${map_file}")
 endfunction()
 
 function(add_arduino_library target_name sources)

@@ -27,6 +27,7 @@ set(ARDUINO_CORE_DIRECTORY "${ARDUINO_BOARD_CORE_ROOT}/cores/arduino/")
 
 set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
+set(CXX_FILT "c++filt")
 
 # This used to be more buggy.
 foreach(mp ${CMAKE_MODULE_PATH})
@@ -262,9 +263,11 @@ function(configure_firmware_link target_name additional_libraries)
 
   set(elf_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.elf)
   set(bin_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.bin)
+  set(sym_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.sym)
   set(map_file ${CMAKE_CURRENT_BINARY_DIR}/${target_name}.map)
   set(elf_target ${target_name}.elf)
   set(bin_target ${target_name}.bin)
+  set(sym_target ${target_name}.sym)
 
   get_filename_component(linker_script_include ${target_bootloader} DIRECTORY)
   set(linker_script ${target_bootloader})
@@ -293,6 +296,15 @@ function(configure_firmware_link target_name additional_libraries)
   )
   add_custom_target(${bin_target} ALL DEPENDS ${bin_file})
   add_dependencies(${bin_target} ${elf_target})
+
+
+  add_custom_command(
+    OUTPUT ${sym_file}
+    DEPENDS ${elf_file}
+    COMMAND ${ARDUINO_NM} --print-size --size-sort --radix=d ${elf_file} | ${CXX_FILT} > ${sym_file})
+  add_custom_target(${sym_target} ALL DEPENDS ${sym_file})
+  add_dependencies(${sym_target} ${elf_target})
+
 
   set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${elf_file}" "${bin_file}" "${map_file}")
 endfunction()

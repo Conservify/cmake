@@ -26,6 +26,9 @@ function(fk_add_core_library target_name)
   find_package(arduino-logging)
   target_link_libraries(${target_name} arduino-logging)
 
+  find_package(segger)
+  target_link_libraries(${target_name} SeggerRTT)
+
   find_package(Wire)
   target_link_libraries(${target_name} Wire)
 

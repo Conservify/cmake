@@ -250,8 +250,11 @@ function(configure_firmware_link target_name additional_libraries)
 
   foreach(library ${unique_libraries})
     get_target_property(library_dir ${library} BINARY_DIR)
+    get_target_property(link_whole_library ${library} LINK_WHOLE_LIBRARY)
 
-    if(${library} STREQUAL "ConservifyOS")
+    if(${link_whole_library})
+      list(APPEND whole_library_files ${library_dir}/lib${library}.a)
+    elseif(${library} STREQUAL "ConservifyOS")
       list(APPEND whole_library_files ${library_dir}/lib${library}.a)
     else()
       list(APPEND library_files ${library_dir}/lib${library}.a)

@@ -300,11 +300,10 @@ function(configure_firmware_link target_name additional_libraries)
   add_custom_target(${bin_target} ALL DEPENDS ${bin_file})
   add_dependencies(${bin_target} ${elf_target})
 
-
   add_custom_command(
     OUTPUT ${sym_file}
     DEPENDS ${elf_file}
-    COMMAND ${ARDUINO_NM} --print-size --size-sort --radix=d ${elf_file} | ${CXX_FILT} > ${sym_file})
+    COMMAND ${ARDUINO_NM} -C -l --print-size --size-sort -r --radix=d ${elf_file} | ${CXX_FILT} > ${sym_file})
   add_custom_target(${sym_target} ALL DEPENDS ${sym_file})
   add_dependencies(${sym_target} ${elf_target})
 

@@ -134,7 +134,7 @@ function(enable_m4_board board)
 endfunction()
 
 function(enable_m4)
-  enable_m4_board("feather_m4")
+  enable_m4_board("grand_central_m4")
 endfunction()
 
 function(enable_small_bootloader)

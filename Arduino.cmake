@@ -29,6 +29,7 @@ set(ARDUINO_OBJCOPY "${ARM_TOOLS}/arm-none-eabi-objcopy")
 set(ARDUINO_NM "${ARM_TOOLS}/arm-none-eabi-nm")
 set(CXX_FILT "c++filt")
 set(ARDUINO_PROJECT_FLAGS)
+set(ARDUINO_PROJECT_LD_FLAGS)
 
 # This used to be more buggy.
 foreach(mp ${CMAKE_MODULE_PATH})
@@ -48,7 +49,7 @@ function(enable_m0_target target_name target_board)
   set(target_cxx_flags "${target_c_flags} -fno-threadsafe-statics -fno-rtti -fno-exceptions")
   set(target_asm_flags "-g -x assembler-with-cpp -mcpu=${target_mcu} -mthumb ${target_board_flags}")
 
-  set(target_board_ldflags "-mcpu=${target_mcu} -mthumb")
+  set(target_board_ldflags "-mcpu=${target_mcu} -mthumb ${ARDUINO_PROJECT_LD_FLAGS}")
   set(target_board_libraries "-lm -larm_cortexM0l_math")
   set(target_includes ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${target_board_directory})
 
@@ -91,7 +92,7 @@ function(enable_m4_target target_name target_board)
   set(target_cxx_flags "${target_c_flags} -fno-threadsafe-statics -fno-rtti -fno-exceptions")
   set(target_asm_flags "-g -x assembler-with-cpp -mcpu=${target_mcu} -mthumb ${target_board_flags}")
 
-  set(target_board_ldflags "-mcpu=${target_mcu} -mthumb")
+  set(target_board_ldflags "-mcpu=${target_mcu} -mthumb ${ARDUINO_PROJECT_LD_FLAGS}")
   set(target_board_libraries "-larm_cortexM4lf_math -mfloat-abi=hard -mfpu=fpv4-sp-d16 -lstdc++")
   set(target_includes ${ARDUINO_CMSIS_INCLUDE_DIRECTORY} ${ARDUINO_DEVICE_DIRECTORY} ${ARDUINO_CORE_DIRECTORY} ${target_board_directory})
 

@@ -232,6 +232,7 @@ function(configure_firmware_link target_name additional_libraries)
   get_target_property(target_board_libraries ${target_name} target_board_libraries)
   get_target_property(target_includes ${target_name} target_includes)
   get_target_property(target_bootloader ${target_name} target_bootloader)
+  get_target_property(target_custom_ldflags ${target_name} target_custom_ldflags)
 
   set(dependencies)
   set(unique_libraries)
@@ -284,13 +285,19 @@ function(configure_firmware_link target_name additional_libraries)
   string(REPLACE " " ";" ldflags ${target_board_ldflags})
   string(REPLACE " " ";" board_libraries ${target_board_libraries})
 
+  if(${target_custom_ldflags} STREQUAL "target_custom_ldflags-NOTFOUND")
+	set(custom_ldflags "")
+  else()
+	string(REPLACE " " ";" custom_ldflags ${target_custom_ldflags})
+  endif()
+
   add_custom_command(
     OUTPUT ${elf_file}
     DEPENDS ${dependencies}
     COMMAND ${CMAKE_C_COMPILER} -Os -Wl,--gc-sections -save-temps -T${linker_script}
     --specs=nano.specs --specs=nosys.specs -Wl,--cref -Wl,--check-sections ${ldflags}
     -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align -Wl,--emit-relocs
-    -Wl,-Map,${map_file} -o ${elf_file}
+    -Wl,-Map,${map_file} ${custom_ldflags} -o ${elf_file}
     -L${ARDUINO_CMSIS_DIRECTORY}/Lib/GCC/ -L${linker_script_include}
     -Wl,--whole-archive ${whole_library_files} -Wl,--no-whole-archive
     ${library_files} ${additional_libraries} ${board_libraries}
@@ -312,7 +319,6 @@ function(configure_firmware_link target_name additional_libraries)
     COMMAND ${ARDUINO_NM} -C -l --print-size --size-sort -r --radix=d ${elf_file} | ${CXX_FILT} > ${sym_file})
   add_custom_target(${sym_target} ALL DEPENDS ${sym_file})
   add_dependencies(${sym_target} ${elf_target})
-
 
   set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${elf_file}" "${bin_file}" "${map_file}")
 endfunction()

@@ -349,6 +349,8 @@ function(add_arduino_bootloader target_name)
 
   configure_arduino_core_target(${target_board})
 
+  target_link_libraries(${target_name} arduino-core-${target_board})
+
   configure_firmware_link(${target_name} "")
 endfunction()
 
